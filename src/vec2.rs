@@ -21,11 +21,11 @@ impl Vec2 {
     pub fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
+}
 
-    pub fn diff(self, other: Vec2) -> Vec2 {
-        let x_diff = (self.x - other.x).abs();
-        let y_diff = (self.y - other.y).abs();
-        Vec2::new(x_diff, y_diff)
+impl PartialEq for Vec2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
     }
 }
 
@@ -66,5 +66,57 @@ impl SubAssign for Vec2 {
             x: self.x - other.x,
             y: self.y - other.y,
         };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Vec2;
+
+    #[test]
+    fn eq() {
+        let first = Vec2::new(1f32, 2f32);
+        let second = Vec2::new(1f32, 2f32);
+        assert_eq!(first, second)
+    }
+
+    #[test]
+    fn neq_x() {
+        let first = Vec2::new(1f32, 2f32);
+        let second = Vec2::new(3f32, 2f32);
+        assert_ne!(first, second)
+    }
+
+    #[test]
+    fn neq_y() {
+        let first = Vec2::new(1f32, 2f32);
+        let second = Vec2::new(1f32, 3f32);
+        assert_ne!(first, second)
+    }
+
+    #[test]
+    fn add() {
+        let sum = Vec2::new(1f32, 2f32) + Vec2::new(10f32, 20f32);
+        assert_eq!(sum, Vec2::new(11f32, 22f32))
+    }
+
+    #[test]
+    fn add_assign() {
+        let mut summand = Vec2::new(1f32, 2f32);
+        summand += Vec2::new(10f32, 20f32);
+        assert_eq!(summand, Vec2::new(11f32, 22f32))
+    }
+
+    #[test]
+    fn sub() {
+        let dif = Vec2::new(10f32, 20f32) - Vec2::new(1f32, 2f32);
+        assert_eq!(dif, Vec2::new(9f32, 18f32))
+    }
+
+    #[test]
+    fn sub_assign() {
+        let mut minuend = Vec2::new(10f32, 20f32);
+        minuend -= Vec2::new(1f32, 2f32);
+        assert_eq!(minuend, Vec2::new(9f32, 18f32))
     }
 }
