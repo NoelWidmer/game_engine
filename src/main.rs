@@ -1,24 +1,31 @@
 mod vec2;
 
 mod transform2;
-mod point_in_space;
+mod transformer2;
 
 mod world;
-mod spawnable;
 mod entity;
 mod components;
 
 use world::World;
+use components::Components;
 use transform2::Transform2;
-use point_in_space::PointInSpace;
 
 fn main() {
     let mut world = World::new();
+    
+    let pis = Components
+        ::with_capacity(1)
+        .add_default::<Transform2>().unwrap();
 
-    let pis1 = world.spawn_entity::<PointInSpace>();
+    let pis1 = world.spawn_entity(pis);
     println!("added pis: {}", pis1);
 
-    let pis2 = world.spawn_entity::<PointInSpace>();
+    let pis = Components
+        ::with_capacity(1)
+        .add_default::<Transform2>().unwrap();
+
+    let pis2 = world.spawn_entity(pis);
     println!("added pis: {}", pis2);
 
     let pis = world.find_entities_with_component::<Transform2>();

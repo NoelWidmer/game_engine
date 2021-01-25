@@ -1,5 +1,13 @@
-use std::any::{ Any, TypeId };
-use std::collections::{ HashMap, hash_map::Entry };
+use std::{
+    any::{ 
+        Any, 
+        TypeId 
+    }, 
+    collections::{ 
+        HashMap, 
+        hash_map::Entry 
+    }
+};
 
 pub struct Components {
     map: HashMap<TypeId, Box<dyn Any>>

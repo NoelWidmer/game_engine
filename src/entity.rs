@@ -1,22 +1,21 @@
-use std::collections::HashMap;
-use std::any::{ Any, TypeId };
+use std::{
+    any::{ 
+        Any, 
+        TypeId 
+    }, 
+    collections::HashMap
+};
 use super::components::Components;
 
 pub struct Entity {
-    id: u64, 
     components: HashMap<TypeId, Box<dyn Any>>
 }
 
 impl Entity {
-    pub fn new(id: u64, components: Components) -> Self {
+    pub fn new(components: Components) -> Self {
         Self {
-            id, 
             components: components.consume()
         }
-    }
-
-    pub fn id(&self) -> u64 {
-        self.id
     }
 
     pub fn component_kinds_ref(&self) -> Vec<&TypeId> {

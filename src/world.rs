@@ -1,7 +1,17 @@
-use super::entity::Entity;
-use super::spawnable::Spawnable;
-use std::collections::{ HashMap, HashSet };
-use std::any::{ Any, TypeId };
+use std::{
+    any::{ 
+        Any, 
+        TypeId
+    }, 
+    collections::{ 
+        HashMap, 
+        HashSet 
+    }
+};
+use super::{
+    entity::Entity, 
+    components::Components
+};
 
 pub struct World {
     next_entity_id: u64,
@@ -18,13 +28,11 @@ impl World {
         }
     }
 
-    pub fn spawn_entity<S: Spawnable>(&mut self) -> u64 {
+    pub fn spawn_entity(&mut self, components: Components) -> u64 {
         let entity_id = self.next_entity_id;
         self.next_entity_id = entity_id + 1;
 
-        let components = S::components_to_spawn_with();
-
-        let entity = Entity::new(entity_id, components);
+        let entity = Entity::new(components);
 
         for component_kind in entity.component_kinds_ref() {
             self
