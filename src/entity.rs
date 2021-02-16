@@ -27,13 +27,6 @@ impl Entity {
         }
     }
 
-    pub fn component_kinds_ref(&self) -> Vec<&TypeId> {
-        self
-            .components
-            .keys()
-            .collect()
-    }
-
     pub fn component_kinds(self) -> Vec<TypeId> {
         self
             .components
@@ -52,6 +45,11 @@ impl Entity {
         let type_id = TypeId::of::<C>();
         let any = self.components.get_mut(&type_id);
         any.map(|c| c.downcast_mut().expect(Self::ERR))
+    }
+
+    pub fn remove_component<C: Any>(&mut self) {
+        let type_id = TypeId::of::<C>();
+        self.components.remove(&type_id);
     }
 
     const ERR: &'static str = "a component is expected to be of the type it was registered as";

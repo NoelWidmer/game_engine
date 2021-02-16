@@ -37,7 +37,20 @@ impl World {
         }
 
         entity_id
-    }    
+    }
+
+    pub fn despawn_entity(&mut self, entity_id: &u64) {
+        if let Some(entity) = self.entities.remove(entity_id) {
+            for component_kind in entity.component_kinds() {
+                self
+                    .component_registry
+                    .entry(component_kind)
+                    .and_modify(|entry| {
+                        entry.remove(entity_id);
+                    });
+            }
+        }
+    }   
 
     pub fn add_default_component<C: Any + Default>(&mut self, entity_id: u64) -> Result<(), ()> {
         self.add_component::<C>(entity_id, C::default())
@@ -86,17 +99,11 @@ impl World {
             .flatten()
     }
 
-    pub fn despawn_entity(&mut self, entity_id: &u64) {
-        if let Some(entity) = self.entities.remove(entity_id) {
-            for component_kind in entity.component_kinds() {
-                self
-                    .component_registry
-                    .entry(component_kind)
-                    .and_modify(|entry| {
-                        entry.remove(entity_id);
-                    });
-            }
-        }
+    pub fn remove_component<C: Any>(&mut self, entity_id: u64) {
+        self
+            .entities
+            .get_mut(&entity_id)
+            .map(|entity| entity.remove_component::<C>());
     }
 
     pub fn find_entities_with_component<C: Any>(&self) -> HashSet<u64> {
