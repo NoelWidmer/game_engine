@@ -44,13 +44,13 @@ impl World {
             for component_kind in entity.component_kinds() {
                 self
                     .component_registry
-                    .entry(component_kind)
+                    .entry(*component_kind)
                     .and_modify(|entry| {
                         entry.remove(entity_id);
                     });
             }
         }
-    }   
+    }
 
     pub fn add_default_component<C: Any + Default>(&mut self, entity_id: u64) -> Result<(), ()> {
         self.add_component::<C>(entity_id, C::default())

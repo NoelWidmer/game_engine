@@ -102,9 +102,9 @@ mod tests {
 
     #[test]
     fn add_assign() {
-        let mut summand = Vec2::new(1f32, 2f32);
-        summand += Vec2::new(10f32, 20f32);
-        assert_eq!(summand, Vec2::new(11f32, 22f32))
+        let mut sum = Vec2::new(1f32, 2f32);
+        sum += Vec2::new(10f32, 20f32);
+        assert_eq!(sum, Vec2::new(11f32, 22f32))
     }
 
     #[test]
@@ -115,8 +115,8 @@ mod tests {
 
     #[test]
     fn sub_assign() {
-        let mut minuend = Vec2::new(10f32, 20f32);
-        minuend -= Vec2::new(1f32, 2f32);
-        assert_eq!(minuend, Vec2::new(9f32, 18f32))
+        let mut dif = Vec2::new(10f32, 20f32);
+        dif -= Vec2::new(1f32, 2f32);
+        assert_eq!(dif, Vec2::new(9f32, 18f32))
     }
 }
