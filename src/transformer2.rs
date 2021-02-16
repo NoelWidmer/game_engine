@@ -3,40 +3,68 @@ use super::{
     vec2::Vec2, 
     transform2::Transform2
 };
+use std::collections::HashSet;
 
 pub struct Transformer2 { }
 
 impl Transformer2 {
-    pub fn parent(world: &mut World, parent_entity_id: u64, child_entity_id: u64) -> Result<(), ()> {
-        let res = Self::find_transform2(world, parent_entity_id) 
-            .map(|parent_transform| {
+    pub fn adopt(world: &mut World, parent_entity_id: u64, child_entity_id: u64) -> Result<(), ()> {
+        let parent_result = 
+            if let Some(parent_transform) = world.component_mut::<Transform2>(parent_entity_id) {
+                // attach parent to child
                 parent_transform.add_child(child_entity_id);
-                parent_transform.clone()
-            });
+                Ok(parent_transform.abs_location())
+            } else {
+                Err(())
+            };
 
-        match res {
-            Ok(parent_transform) => {
-                Self::find_transform2(world, child_entity_id)
-                    .map(|child_transform| child_transform.set_parent(parent_entity_id, &parent_transform))
-            }, 
-            Err(err) => Err(err)
+        if let Ok(parent_abs_location) = parent_result {
+            if let Some(child_transform) = world.component_mut::<Transform2>(child_entity_id) {
+                // attach child to parent
+                child_transform.set_parent(parent_entity_id, parent_abs_location);
+                Ok(())
+            } else {
+                // revert partially comitted adoption
+                let parent_transform = world.component_mut::<Transform2>(parent_entity_id).unwrap();
+                parent_transform.remove_child(&child_entity_id);
+                Err(())
+            }
+        } else {
+            Err(())
         }
     }
 
     pub fn set_location(world: &mut World, entity_id: u64, location: Vec2) -> Result<(), ()> {
-        Self::find_transform2(world, entity_id)
-            .map(|t| t.set_location(location))
+        world
+            .component_mut::<Transform2>(entity_id)
+            .map(|transform| {
+                transform.set_location(location);
+                (transform.abs_location(), transform.children_entity_ids().clone()) // todo optimize
+            })
+            .map(|data| Self::update_children_location(world, data.0, &data.1))
+            .ok_or(())
     }
 
     pub fn add_location(world: &mut World, entity_id: u64, location: Vec2) -> Result<(), ()> {
-        Self::find_transform2(world, entity_id)
-            .map(|t| t.add_location(location))
+        world
+            .component_mut::<Transform2>(entity_id)
+            .map(|transform| {
+                transform.add_location(location);
+                (transform.abs_location(), transform.children_entity_ids().clone()) // todo optimize
+            })
+            .map(|data| Self::update_children_location(world, data.0, &data.1))
+            .ok_or(())
     }
 
-    fn find_transform2(world: &mut World, entity_id: u64) -> Result<&mut Transform2, ()> {        
-        match world.get_component_mut::<Transform2>(entity_id) {
-            Some(component) => Ok(component), 
-            None => Err(())
+    fn update_children_location(world: &mut World, parent_location: Vec2, children_entity_ids: &HashSet<u64>) {
+        for child_entity_id in children_entity_ids {
+            let data = {
+                let child_transform = world.component_mut::<Transform2>(child_entity_id.clone()).expect("");
+                child_transform.set_parent_location(parent_location);
+                (child_transform.abs_location(), child_transform.children_entity_ids().clone()) // todo optimize
+            };
+
+            Self::update_children_location(world, data.0, &data.1);
         }
     }
 }

@@ -23,7 +23,7 @@ fn main() {
     let pis2_id = world.spawn_entity();
     world.add_default_component::<Transform2>(pis2_id).unwrap();
 
-    Transformer2::parent(&mut world, pis1_id, pis2_id).unwrap();
+    Transformer2::adopt(&mut world, pis1_id, pis2_id).unwrap();
 
     let pis1_t = world.get_component::<Transform2>(pis1_id).unwrap();
     let pis2_t = world.get_component::<Transform2>(pis2_id).unwrap();

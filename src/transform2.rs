@@ -34,13 +34,17 @@ impl Transform2 {
         self.parent_entity_id.map(|_| self.abs_location - self.location)
     }
 
-    pub fn set_parent(&mut self, parent_entity_id: u64, parent_transform: &Transform2) {
+    pub fn set_parent(&mut self, parent_entity_id: u64, parent_abs_location: Vec2) {
         self.parent_entity_id = Some(parent_entity_id);
-        self.set_parent_transform(parent_transform);
+        self.set_parent_location(parent_abs_location);
     }
 
-    pub fn set_parent_transform(&mut self, parent_transform: &Transform2) {
-        self.abs_location = parent_transform.abs_location() + self.location;
+    pub fn set_parent_location(&mut self, parent_abs_location: Vec2) {
+        self.abs_location = parent_abs_location + self.location;
+    }
+
+    pub fn children_entity_ids(&self) -> &HashSet<u64> {
+        &self.child_entity_ids
     }
 
     pub fn add_child(&mut self, child_entity_id: u64) {
@@ -60,7 +64,8 @@ impl Transform2 {
     }
 
     pub fn set_location(&mut self, location: Vec2) {
-        self.add_location(location - self.location);
+        self.abs_location += location - self.location;
+        self.location = location;
     }
 
     pub fn add_location(&mut self, location: Vec2)  {

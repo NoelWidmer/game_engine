@@ -91,7 +91,7 @@ impl World {
             .flatten()
     }
 
-    pub fn get_component_mut<C: Any>(&mut self, entity_id: u64) -> Option<&mut C> {
+    pub fn component_mut<C: Any>(&mut self, entity_id: u64) -> Option<&mut C> {
         self
             .entities
             .get_mut(&entity_id)
