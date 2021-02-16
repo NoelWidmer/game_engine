@@ -25,15 +25,9 @@ fn main() {
 
     Transformer2::parent(&mut world, pis1_id, pis2_id).unwrap();
 
-    let pis1_t = world.entity(pis1_id).unwrap().component::<Transform2>().unwrap();
-    let pis2_t = world.entity(pis2_id).unwrap().component::<Transform2>().unwrap();
+    let pis1_t = world.get_component::<Transform2>(pis1_id).unwrap();
+    let pis2_t = world.get_component::<Transform2>(pis2_id).unwrap();
     
     println!("{:?}", pis1_t);
     println!("{:?}", pis2_t);
-
-    /*let pis = world.find_entities_with_component::<Transform2>();
-    println!("number of pis: {}", pis.len());
-
-    world.despawn_entity(&pis1_id);
-    world.despawn_entity(&pis2_id);*/
 }

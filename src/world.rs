@@ -30,17 +30,14 @@ impl World {
 
     pub fn spawn_entity(&mut self) -> u64 {
         let entity_id = self.next_entity_id;
+        self.next_entity_id = entity_id + 1;
 
-        let entity = Entity::new();
-
-        if self.entities.insert(entity_id, entity).is_some() {
+        if self.entities.insert(entity_id, Entity::new()).is_some() {
             panic!("could not spawn entity with id {} because that id is already in use.", entity_id);
         }
 
-        self.next_entity_id = entity_id + 1;
         entity_id
-    }
-    
+    }    
 
     pub fn add_default_component<C: Any + Default>(&mut self, entity_id: u64) -> Result<(), ()> {
         self.add_component::<C>(entity_id, C::default())
@@ -49,23 +46,44 @@ impl World {
     pub fn add_component<C: Any>(&mut self, entity_id: u64, component: C) -> Result<(), ()> {
         let type_id = TypeId::of::<C>();
 
-        // todo: add  component to entity.
-
-        match self.component_registry.entry(type_id) {
-            Entry::Occupied(mut entry) => {
-                if entry.get_mut().insert(entity_id) {
-                    Ok(())
-                } else {
-                    Err(())
+        if let Some(entity) = self.entities.get_mut(&entity_id) {
+            if entity.add_component(component).is_ok() {
+                match self.component_registry.entry(type_id) {
+                    Entry::Occupied(mut entry) => {
+                        if entry.get_mut().insert(entity_id) == false {
+                            panic!("entity with id {} was not expected to have component of type {:?}", entity_id, type_id);
+                        }
+                    }, 
+                    Entry::Vacant(entry) => {
+                        let mut set = HashSet::with_capacity(1);
+                        set.insert(entity_id);
+                        entry.insert(set);
+                    }
                 }
-            }, 
-            Entry::Vacant(entry) => {
-                let mut set = HashSet::with_capacity(1);
-                set.insert(entity_id);
-                entry.insert(set);
+                
                 Ok(())
+            } else {
+                Err(()) // entity already contains component
             }
+        } else {
+            Err(()) // entity does not exist
         }
+    }
+
+    pub fn get_component<C: Any>(&self, entity_id: u64) -> Option<&C> {
+        self
+            .entities
+            .get(&entity_id)
+            .map(|entity| entity.component::<C>())
+            .flatten()
+    }
+
+    pub fn get_component_mut<C: Any>(&mut self, entity_id: u64) -> Option<&mut C> {
+        self
+            .entities
+            .get_mut(&entity_id)
+            .map(|entity| entity.component_mut::<C>())
+            .flatten()
     }
 
     pub fn despawn_entity(&mut self, entity_id: &u64) {
@@ -74,8 +92,9 @@ impl World {
                 self
                     .component_registry
                     .entry(component_kind)
-                    .or_insert_with(HashSet::new)
-                    .remove(entity_id);
+                    .and_modify(|entry| {
+                        entry.remove(entity_id);
+                    });
             }
         }
     }
@@ -87,17 +106,5 @@ impl World {
             Some(entity_ids) => entity_ids.clone(), 
             None => HashSet::new()
         }
-    }
-
-    pub fn entity_count(&self) -> usize {
-        self.entities.len()
-    }
-
-    pub fn entity(&self, entity_id: u64) -> Option<&Entity> {
-        self.entities.get(&entity_id)
-    }
-
-    pub fn entity_mut(&mut self, entity_id: u64) -> Option<&mut Entity> {
-        self.entities.get_mut(&entity_id)
     }
 }

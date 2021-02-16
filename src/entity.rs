@@ -17,11 +17,15 @@ impl Entity {
         }
     }
     
-    /*pub fn new_with_components(components: Components) -> Self {
-        Self {
-            components: components.consume()
+    pub fn add_component<C: Any>(&mut self, component: C) -> Result<(), ()> {
+        let type_id = TypeId::of::<C>();
+
+        if self.components.insert(type_id, Box::new(component)).is_some() {
+            Err(())
+        } else {
+            Ok(())
         }
-    }*/
+    }
 
     pub fn component_kinds_ref(&self) -> Vec<&TypeId> {
         self

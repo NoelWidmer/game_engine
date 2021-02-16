@@ -6,14 +6,8 @@ use super::{
 
 pub struct Transformer2 { }
 
-#[derive(Debug)]
-pub enum TransformerError {
-    EntityDoesNotExist, 
-    EntityDoesNotHaveTransform2
-}
-
 impl Transformer2 {
-    pub fn parent(world: &mut World, parent_entity_id: u64, child_entity_id: u64) -> Result<(), TransformerError> {
+    pub fn parent(world: &mut World, parent_entity_id: u64, child_entity_id: u64) -> Result<(), ()> {
         let res = Self::find_transform2(world, parent_entity_id) 
             .map(|parent_transform| {
                 parent_transform.add_child(child_entity_id);
@@ -29,25 +23,20 @@ impl Transformer2 {
         }
     }
 
-    pub fn set_location(world: &mut World, entity_id: u64, location: Vec2) -> Result<(), TransformerError> {
+    pub fn set_location(world: &mut World, entity_id: u64, location: Vec2) -> Result<(), ()> {
         Self::find_transform2(world, entity_id)
             .map(|t| t.set_location(location))
     }
 
-    pub fn add_location(world: &mut World, entity_id: u64, location: Vec2) -> Result<(), TransformerError> {
+    pub fn add_location(world: &mut World, entity_id: u64, location: Vec2) -> Result<(), ()> {
         Self::find_transform2(world, entity_id)
             .map(|t| t.add_location(location))
     }
 
-    fn find_transform2(world: &mut World, entity_id: u64) -> Result<&mut Transform2, TransformerError> {
-        match world.entity_mut(entity_id) {
-            Some(entity) => {
-                match entity.component_mut::<Transform2>() {
-                    Some(component) => Ok(component), 
-                    None => Err(TransformerError::EntityDoesNotHaveTransform2)
-                }
-            }, 
-            None => Err(TransformerError::EntityDoesNotExist)
+    fn find_transform2(world: &mut World, entity_id: u64) -> Result<&mut Transform2, ()> {        
+        match world.get_component_mut::<Transform2>(entity_id) {
+            Some(component) => Ok(component), 
+            None => Err(())
         }
     }
 }
