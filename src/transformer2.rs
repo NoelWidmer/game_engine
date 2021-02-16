@@ -59,7 +59,7 @@ impl Transformer2 {
     fn update_children_location(world: &mut World, parent_location: Vec2, children_entity_ids: &HashSet<u64>) {
         for child_entity_id in children_entity_ids {
             let data = {
-                let child_transform = world.component_mut::<Transform2>(child_entity_id.clone()).expect("");
+                let child_transform = world.component_mut::<Transform2>(*child_entity_id).expect("");
                 child_transform.set_parent_location(parent_location);
                 (child_transform.abs_location(), child_transform.children_entity_ids().clone()) // todo optimize
             };

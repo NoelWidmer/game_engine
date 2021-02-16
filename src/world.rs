@@ -63,7 +63,7 @@ impl World {
             if entity.add_component(component).is_ok() {
                 match self.component_registry.entry(type_id) {
                     Entry::Occupied(mut entry) => {
-                        if entry.get_mut().insert(entity_id) == false {
+                        if !entry.get_mut().insert(entity_id) {
                             panic!("entity with id {} was not expected to have component of type {:?}", entity_id, type_id);
                         }
                     }, 
@@ -100,10 +100,9 @@ impl World {
     }
 
     pub fn remove_component<C: Any>(&mut self, entity_id: u64) {
-        self
-            .entities
-            .get_mut(&entity_id)
-            .map(|entity| entity.remove_component::<C>());
+        if let Some(entity) = self.entities.get_mut(&entity_id) {
+            entity.remove_component::<C>();
+        }
     }
 
     pub fn find_entities_with_component<C: Any>(&self) -> HashSet<u64> {
