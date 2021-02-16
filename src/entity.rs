@@ -5,18 +5,23 @@ use std::{
     }, 
     collections::HashMap
 };
-use super::components::Components;
 
 pub struct Entity {
     components: HashMap<TypeId, Box<dyn Any>>
 }
 
 impl Entity {
-    pub fn new(components: Components) -> Self {
+    pub fn new() -> Self {
+        Self {
+            components: HashMap::new()
+        }
+    }
+    
+    /*pub fn new_with_components(components: Components) -> Self {
         Self {
             components: components.consume()
         }
-    }
+    }*/
 
     pub fn component_kinds_ref(&self) -> Vec<&TypeId> {
         self
@@ -33,19 +38,17 @@ impl Entity {
             .collect()
     }
 
-    pub fn component<T: Any>(&self) -> Option<&T> {
-        let type_id = TypeId::of::<T>();
+    pub fn component<C: Any>(&self) -> Option<&C> {
+        let type_id = TypeId::of::<C>();
         let any = self.components.get(&type_id);
-        any.map(|c| c.downcast_ref().expect(Self::err()))
+        any.map(|c| c.downcast_ref().expect(Self::ERR))
     }
 
-    pub fn component_mut<T: Any>(&mut self) -> Option<&mut T> {
-        let type_id = TypeId::of::<T>();
+    pub fn component_mut<C: Any>(&mut self) -> Option<&mut C> {
+        let type_id = TypeId::of::<C>();
         let any = self.components.get_mut(&type_id);
-        any.map(|c| c.downcast_mut().expect(Self::err()))
+        any.map(|c| c.downcast_mut().expect(Self::ERR))
     }
 
-    fn err() -> &'static str {
-        "a component is expected to be of the type it was registered as"
-    }
+    const ERR: &'static str = "a component is expected to be of the type it was registered as";
 }

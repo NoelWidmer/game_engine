@@ -5,12 +5,12 @@ use std::{
     }, 
     collections::{ 
         HashMap, 
+        hash_map::Entry,
         HashSet 
     }
 };
 use super::{
-    entity::Entity, 
-    components::Components
+    entity::Entity
 };
 
 pub struct World {
@@ -28,25 +28,44 @@ impl World {
         }
     }
 
-    pub fn spawn_entity(&mut self, components: Components) -> u64 {
+    pub fn spawn_entity(&mut self) -> u64 {
         let entity_id = self.next_entity_id;
-        self.next_entity_id = entity_id + 1;
 
-        let entity = Entity::new(components);
-
-        for component_kind in entity.component_kinds_ref() {
-            self
-                .component_registry
-                .entry(component_kind.clone())
-                .or_insert(HashSet::new())
-                .insert(entity_id);
-        }
+        let entity = Entity::new();
 
         if self.entities.insert(entity_id, entity).is_some() {
             panic!("could not spawn entity with id {} because that id is already in use.", entity_id);
         }
 
+        self.next_entity_id = entity_id + 1;
         entity_id
+    }
+    
+
+    pub fn add_default_component<C: Any + Default>(&mut self, entity_id: u64) -> Result<(), ()> {
+        self.add_component::<C>(entity_id, C::default())
+    }
+
+    pub fn add_component<C: Any>(&mut self, entity_id: u64, component: C) -> Result<(), ()> {
+        let type_id = TypeId::of::<C>();
+
+        // todo: add  component to entity.
+
+        match self.component_registry.entry(type_id) {
+            Entry::Occupied(mut entry) => {
+                if entry.get_mut().insert(entity_id) {
+                    Ok(())
+                } else {
+                    Err(())
+                }
+            }, 
+            Entry::Vacant(entry) => {
+                let mut set = HashSet::with_capacity(1);
+                set.insert(entity_id);
+                entry.insert(set);
+                Ok(())
+            }
+        }
     }
 
     pub fn despawn_entity(&mut self, entity_id: &u64) {
@@ -77,11 +96,11 @@ impl World {
         self.entities.len()
     }
 
-    pub fn entity(&self, entity_id: &u64) -> Option<&Entity> {
-        self.entities.get(entity_id)
+    pub fn entity(&self, entity_id: u64) -> Option<&Entity> {
+        self.entities.get(&entity_id)
     }
 
-    pub fn entity_mut(&mut self, entity_id: &u64) -> Option<&mut Entity> {
-        self.entities.get_mut(entity_id)
+    pub fn entity_mut(&mut self, entity_id: u64) -> Option<&mut Entity> {
+        self.entities.get_mut(&entity_id)
     }
 }
