@@ -69,17 +69,14 @@ impl World {
     }
 
     pub fn despawn_entity(&mut self, entity_id: &u64) {
-        match self.entities.remove(entity_id) {
-            Some(entity) => {
-                for component_kind in entity.component_kinds() {
-                    self
-                        .component_registry
-                        .entry(component_kind)
-                        .or_insert(HashSet::new())
-                        .remove(entity_id);
-                }
-            }, 
-            None => ()
+        if let Some(entity) = self.entities.remove(entity_id) {
+            for component_kind in entity.component_kinds() {
+                self
+                    .component_registry
+                    .entry(component_kind)
+                    .or_insert_with(HashSet::new)
+                    .remove(entity_id);
+            }
         }
     }
 
