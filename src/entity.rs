@@ -139,10 +139,11 @@ mod tests {
         let mut entity = Entity::new();
 
         entity.add_component(DummyComponent3 { text: "test".to_string() }).unwrap();
-        let component = entity.component_mut::<DummyComponent3>();
+        let mut component = entity.component_mut::<DummyComponent3>().unwrap();
         
-        assert!(component.is_some());
-        assert_eq!(component.unwrap().text, "test");
+        assert_eq!(component.text, "test");
+
+        component.text = "another test".to_string(); // ensure is mutable
     }
 
     #[test]

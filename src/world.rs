@@ -10,13 +10,14 @@ use std::{
     }
 };
 use super::{
-    entity::Entity
+    entity::Entity, 
+    entity_id::EntityId
 };
 
 pub struct World {
     next_entity_id: u64,
-    entities: HashMap<u64, Entity>,
-    component_registry: HashMap<TypeId, HashSet<u64>>
+    entities: HashMap<EntityId, Entity>,
+    component_registry: HashMap<TypeId, HashSet<EntityId>>
 }
 
 impl World {
@@ -28,9 +29,9 @@ impl World {
         }
     }
 
-    pub fn spawn_entity(&mut self) -> u64 {
-        let entity_id = self.next_entity_id;
-        self.next_entity_id = entity_id + 1;
+    pub fn spawn_entity(&mut self) -> EntityId {
+        let entity_id = EntityId::new(self.next_entity_id);
+        self.next_entity_id += 1;
 
         if self.entities.insert(entity_id, Entity::new()).is_some() {
             panic!("could not spawn entity with id {} because that id is already in use.", entity_id);
@@ -39,7 +40,7 @@ impl World {
         entity_id
     }
 
-    pub fn despawn_entity(&mut self, entity_id: &u64) {
+    pub fn despawn_entity(&mut self, entity_id: &EntityId) {
         if let Some(entity) = self.entities.remove(entity_id) {
             for component_kind in entity.component_kinds() {
                 self
@@ -52,11 +53,11 @@ impl World {
         }
     }
 
-    pub fn add_default_component<C: Any + Default>(&mut self, entity_id: u64) -> Result<(), ()> {
+    pub fn add_default_component<C: Any + Default>(&mut self, entity_id: EntityId) -> Result<(), ()> {
         self.add_component::<C>(entity_id, C::default())
     }
 
-    pub fn add_component<C: Any>(&mut self, entity_id: u64, component: C) -> Result<(), ()> {
+    pub fn add_component<C: Any>(&mut self, entity_id: EntityId, component: C) -> Result<(), ()> {
         let type_id = TypeId::of::<C>();
 
         if let Some(entity) = self.entities.get_mut(&entity_id) {
@@ -83,7 +84,7 @@ impl World {
         }
     }
 
-    pub fn get_component<C: Any>(&self, entity_id: u64) -> Option<&C> {
+    pub fn get_component<C: Any>(&self, entity_id: EntityId) -> Option<&C> {
         self
             .entities
             .get(&entity_id)
@@ -91,7 +92,7 @@ impl World {
             .flatten()
     }
 
-    pub fn component_mut<C: Any>(&mut self, entity_id: u64) -> Option<&mut C> {
+    pub fn component_mut<C: Any>(&mut self, entity_id: EntityId) -> Option<&mut C> {
         self
             .entities
             .get_mut(&entity_id)
@@ -99,13 +100,13 @@ impl World {
             .flatten()
     }
 
-    pub fn remove_component<C: Any>(&mut self, entity_id: u64) {
+    pub fn remove_component<C: Any>(&mut self, entity_id: EntityId) {
         if let Some(entity) = self.entities.get_mut(&entity_id) {
             entity.remove_component::<C>();
         }
     }
 
-    pub fn find_entities_with_component<C: Any>(&self) -> HashSet<u64> {
+    pub fn find_entities_with_component<C: Any>(&self) -> HashSet<EntityId> {
         let type_id = TypeId::of::<C>();
             
         match self.component_registry.get(&type_id) {

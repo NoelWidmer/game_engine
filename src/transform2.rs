@@ -1,10 +1,11 @@
 use std::collections::HashSet;
 use super::vec2::Vec2;
+use super::entity_id::EntityId;
 
 #[derive(Debug, Clone)]
 pub struct Transform2 {
-    parent_entity_id: Option<u64>,
-    child_entity_ids: HashSet<u64>,
+    parent_entity_id: Option<EntityId>,
+    child_entity_ids: HashSet<EntityId>,
     abs_location: Vec2,
     location: Vec2
 }
@@ -26,7 +27,7 @@ impl Transform2 {
         }
     }
 
-    pub fn parent_entity_id(&self) -> Option<u64> {
+    pub fn parent_entity_id(&self) -> Option<EntityId> {
         self.parent_entity_id
     } 
 
@@ -34,7 +35,7 @@ impl Transform2 {
         self.parent_entity_id.map(|_| self.abs_location - self.location)
     }
 
-    pub fn set_parent(&mut self, parent_entity_id: u64, parent_abs_location: Vec2) {
+    pub fn set_parent(&mut self, parent_entity_id: EntityId, parent_abs_location: Vec2) {
         self.parent_entity_id = Some(parent_entity_id);
         self.set_parent_location(parent_abs_location);
     }
@@ -43,15 +44,15 @@ impl Transform2 {
         self.abs_location = parent_abs_location + self.location;
     }
 
-    pub fn children_entity_ids(&self) -> &HashSet<u64> {
+    pub fn children_entity_ids(&self) -> &HashSet<EntityId> {
         &self.child_entity_ids
     }
 
-    pub fn add_child(&mut self, child_entity_id: u64) {
+    pub fn add_child(&mut self, child_entity_id: EntityId) {
         self.child_entity_ids.insert(child_entity_id);
     }
 
-    pub fn remove_child(&mut self, child_entity_id: &u64) {
+    pub fn remove_child(&mut self, child_entity_id: &EntityId) {
         self.child_entity_ids.remove(&child_entity_id);
     }
 

@@ -5,6 +5,7 @@ mod transformer2;
 
 mod world;
 mod entity;
+mod entity_id;
 
 use world::World;
 use transform2::Transform2;

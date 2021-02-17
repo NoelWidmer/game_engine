@@ -1,14 +1,15 @@
 use super::{
     world::World, 
     vec2::Vec2, 
-    transform2::Transform2
+    transform2::Transform2, 
+    entity_id::EntityId
 };
 use std::collections::HashSet;
 
 pub struct Transformer2 { }
 
 impl Transformer2 {
-    pub fn adopt(world: &mut World, parent_entity_id: u64, child_entity_id: u64) -> Result<(), ()> {
+    pub fn adopt(world: &mut World, parent_entity_id: EntityId, child_entity_id: EntityId) -> Result<(), ()> {
         let parent_result = 
             if let Some(parent_transform) = world.component_mut::<Transform2>(parent_entity_id) {
                 // attach parent to child
@@ -34,7 +35,7 @@ impl Transformer2 {
         }
     }
 
-    pub fn set_location(world: &mut World, entity_id: u64, location: Vec2) -> Result<(), ()> {
+    pub fn set_location(world: &mut World, entity_id: EntityId, location: Vec2) -> Result<(), ()> {
         world
             .component_mut::<Transform2>(entity_id)
             .map(|transform| {
@@ -45,7 +46,7 @@ impl Transformer2 {
             .ok_or(())
     }
 
-    pub fn add_location(world: &mut World, entity_id: u64, location: Vec2) -> Result<(), ()> {
+    pub fn add_location(world: &mut World, entity_id: EntityId, location: Vec2) -> Result<(), ()> {
         world
             .component_mut::<Transform2>(entity_id)
             .map(|transform| {
@@ -56,7 +57,7 @@ impl Transformer2 {
             .ok_or(())
     }
 
-    fn update_children_location(world: &mut World, parent_location: Vec2, children_entity_ids: &HashSet<u64>) {
+    fn update_children_location(world: &mut World, parent_location: Vec2, children_entity_ids: &HashSet<EntityId>) {
         for child_entity_id in children_entity_ids {
             let data = {
                 let child_transform = world.component_mut::<Transform2>(*child_entity_id).expect("");
