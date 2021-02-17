@@ -1,8 +1,10 @@
-use super::{
-    world::World, 
-    vec2::Vec2, 
-    transform2::Transform2, 
-    entity_id::EntityId
+use crate::{
+    ecs::{
+        World,
+        EntityId
+    },
+    math::Vec2, 
+    transform::Transform2, 
 };
 use std::collections::HashSet;
 

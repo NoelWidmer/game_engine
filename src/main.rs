@@ -1,16 +1,11 @@
-mod vec2;
+mod ecs;
+mod transform;
+mod math;
 
-mod transform2;
-mod transformer2;
-
-mod world;
-mod entity;
-mod entity_id;
-
-use world::World;
-use transform2::Transform2;
-use transformer2::Transformer2;
-use vec2::Vec2;
+use ecs::World;
+use transform::Transform2;
+use transform::Transformer2;
+use math::Vec2;
 
 fn main() {
     let mut world = World::new();

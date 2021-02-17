@@ -1,6 +1,6 @@
 use std::collections::HashSet;
-use super::vec2::Vec2;
-use super::entity_id::EntityId;
+use crate::math::Vec2;
+use crate::ecs::EntityId;
 
 #[derive(Debug, Clone)]
 pub struct Transform2 {
