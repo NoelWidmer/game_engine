@@ -84,7 +84,7 @@ impl World {
         }
     }
 
-    pub fn get_component<C: Any>(&self, entity_id: EntityId) -> Option<&C> {
+    pub fn component<C: Any>(&self, entity_id: EntityId) -> Option<&C> {
         self
             .entities
             .get(&entity_id)
